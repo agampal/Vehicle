@@ -1,0 +1,140 @@
+
+#include <iostream>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+class Vehicle {
+protected:
+    int id;
+    string brand;
+    double rentPerDay;
+    bool available;
+
+public:
+    Vehicle(int i, string b, double r) {
+        id = i;
+        brand = b;
+        rentPerDay = r;
+        available = true;
+    }
+
+    virtual void display() {
+        cout << id << "\t" << brand << "\t"
+             << rentPerDay << "\t"
+             << (available ? "Available" : "Rented") << endl;
+    }
+
+    virtual double calculateRent(int days) {
+        return rentPerDay * days;
+    }
+
+    int getId() {
+        return id;
+    }
+
+    bool isAvailable() {
+        return available;
+    }
+
+    void rentVehicle() {
+        available = false;
+    }
+
+    virtual ~Vehicle() {}
+};
+
+class Car : public Vehicle {
+public:
+    Car(int i, string b, double r)
+        : Vehicle(i, b, r) {}
+
+    double calculateRent(int days) override {
+        return Vehicle::calculateRent(days) + 200 * days;
+    }
+};
+
+class Bike : public Vehicle {
+public:
+    Bike(int i, string b, double r)
+        : Vehicle(i, b, r) {}
+
+    double calculateRent(int days) override {
+        return Vehicle::calculateRent(days) + 50 * days;
+    }
+};
+
+int main() {
+    Car car1(1, "Honda", 1500);
+    Car car2(2, "Toyota", 2000);
+    Bike bike1(3, "Yamaha", 500);
+    Bike bike2(4, "Honda", 400);
+
+    Vehicle* vehicles[] = {&car1, &car2, &bike1, &bike2};
+    int choice, id, days;
+    int size = 4;
+
+    do {
+        cout << "\n=== VEHICLE RENTAL MANAGEMENT SYSTEM ===\n";
+        cout << "1. View Vehicles\n";
+        cout << "2. Rent a Vehicle\n";
+        cout << "3. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "\nID\tBrand\tRent/Day\tStatus\n";
+            for (int i = 0; i < size; i++)
+                vehicles[i]->display();
+            break;
+
+        case 2: {
+            cout << "Enter Vehicle ID: ";
+            cin >> id;
+
+            Vehicle* selected = nullptr;
+
+            for (int i = 0; i < size; i++) {
+                if (vehicles[i]->getId() == id) {
+                    selected = vehicles[i];
+                    break;
+                }
+            }
+
+            if (selected == nullptr) {
+                cout << "Invalid Vehicle ID!\n";
+            } else if (!selected->isAvailable()) {
+                cout << "Vehicle is already rented!\n";
+            } else {
+                cout << "Enter rental days: ";
+                cin >> days;
+
+                if (days <= 0) {
+                    cout << "Enter a valid number of days!\n";
+                    break;
+                }
+
+                double total = selected->calculateRent(days);
+                selected->rentVehicle();
+
+                cout << fixed << setprecision(2);
+                cout << "\nBooking Successful!\n";
+                cout << "Vehicle ID: " << id << endl;
+                cout << "Rental Days: " << days << endl;
+                cout << "Total Rent: Rs. " << total << endl;
+            }
+            break;
+        }
+
+        case 3:
+            cout << "Thank you for using our system!\n";
+            break;
+
+        default:
+            cout << "Invalid choice! Try again.\n";
+        }
+    } while (choice != 3);
+
+    return 0;
+}
